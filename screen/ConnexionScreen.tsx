@@ -10,13 +10,14 @@ import {
   } from 'react-native';
   import {useNavigation} from '@react-navigation/native';
   import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-  import auth from '@react-native-firebase/auth';
+  import auth, { firebase } from '@react-native-firebase/auth';
 import { RootStackParamList } from '../navigation/Stack';
 import {useForm, Controller} from 'react-hook-form';
- 
+import MMKVStorage, { useMMKVStorage, MMKVLoader } from "react-native-mmkv-storage"; 
+// aurore.sifflet@gmail.com AuroreSifflet
 
 type FormValues = {
-  identifiantEmail: string;
+  identifiant: string;
   password: string;
 }; 
 
@@ -29,16 +30,21 @@ type FormValues = {
       formState: {errors},
     } = useForm<FormValues>({
       defaultValues: {
-        identifiantEmail: '',
+        identifiant: '',
         password: '',
       },
     });
-      const onSubmit = ({identifiantEmail, password}: FormValues) => {
+    const storage = new MMKVLoader().initialize();
+
+    const [user, setUser] = useMMKVStorage<string>("identifiant", storage);
+    const [logPassword, setLogPassword] = useMMKVStorage<string>("logPassword", storage);
+
+      const onSubmit = ({identifiant, password}: FormValues) => {
         auth()
-          .signInWithEmailAndPassword(identifiantEmail.trim(), password.trim())
+          .signInWithEmailAndPassword(identifiant.trim(), password.trim())
           .then(() => {
             console.log('User account signed in!');
-            navigation.navigate('HomeConnectedScreen', {identifiantEmail})
+            navigation.navigate('HomeConnectedScreen', {identifiant})           
           })
           .catch(error => {
             if (error.code === 'auth/email-already-in-use') {
@@ -48,24 +54,36 @@ type FormValues = {
             if (error.code === 'auth/invalid-email') {
               console.log('That email address is invalid!');
             }
-    
             console.error(error);
           });
-      };
+          setUser(identifiant);
+          setLogPassword(password) 
+        
+        };
+      /*   console.log(user + logPassword); */
+
+      if(user && logPassword){
+        
+        navigation.navigate('HomeConnectedScreen', {identifiant:user})
+      } 
+       
+      
     
     return (
       <View style={styles.container}>
+         <View>
+              <Text>
+                I am {user} and I am {logPassword} years old.
+              </Text>
+            </View>
         <View>
+
             <TouchableOpacity
             style={styles.btn}
             onPress={() => navigation.navigate('InscriptionScreen')}>
             <Text style={styles.btnText}>Inscription</Text>
             </TouchableOpacity>
-           
-            <Text>Elle permet de se connecter à l’application. La vérification devra se faire via Firebase. Si la connexion réussi rediriger vers une troisième pas qui affichera « Bonjour adresseMail »</Text>
-         
-           
-          
+            <Text>Elle permet de se connecter à l’application. La vérification devra se faire via Firebase. Si la connexion réussi rediriger vers une troisième pas qui affichera « Bonjour adresseMail »</Text>            
         </View>
         <View>
         <Controller
@@ -82,9 +100,9 @@ type FormValues = {
               placeholder="Identifiant, veuillez indiquer un email"
             />
           )}
-          name="identifiantEmail"
+          name="identifiant"
         />
-        {errors.identifiantEmail && <Text>This is required.</Text>}
+        {errors.identifiant && <Text>This is required.</Text>}
 
         <Controller
           control={control}
@@ -112,6 +130,7 @@ type FormValues = {
 
         {/* <Button title="Inscrivez-vous" onPress={() => onSubmit(identifiantEmail, password)} /> */}
         <Button title="Connectez-vous" onPress={handleSubmit(onSubmit)} />
+        <Button title="Mot de passe oublié" onPress={() => navigation.navigate('ForgotPassword')} />
       </View>
 
 

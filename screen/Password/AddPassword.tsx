@@ -3,9 +3,9 @@ import {Text, View, TextInput, Button, Alert, StyleSheet} from 'react-native';
 import auth from '@react-native-firebase/auth';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../navigation/Stack';
 import {useForm, Controller} from 'react-hook-form';
 import firestore from '@react-native-firebase/firestore';
-import { RootStackParamList } from '../../navigation/Stack';
 
 type FormValues = {
   identifiant: string;
@@ -34,7 +34,7 @@ const AddPassword = () => {
     },
   });
 
-  
+
   //   const onSubmit = (data: string) => console.log(data);
   const onSubmit = ({namePlateform, typePlatform, identifiant, password,}: FormValues) => {
  const user = auth().currentUser;

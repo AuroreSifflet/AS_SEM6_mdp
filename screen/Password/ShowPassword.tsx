@@ -17,11 +17,13 @@ type FormValues = {
 };
 
 const ShowPassword = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
   const useremail = auth().currentUser?.email;
   const [loading, setLoading] = useState<boolean>(true); // Set loading to true on component mount
   const [users, setUsers] = useState<FormValues[]>([]); // Initial empty array of users
 
-  const onResult =  (querySnapshot: any) =>{
+  const onResult = (querySnapshot: any) => {
     console.log('OnResult');
     const usersData: FormValues[] = [];
     //console.log('Total users: ', querySnapshot.size);
@@ -39,12 +41,12 @@ const ShowPassword = () => {
     });
     setUsers(usersData);
     setLoading(false);
-  }
+  };
 
   //function onError(error) {
-  const onError = (error:any) => {
+  const onError = (error: any) => {
     console.error(error);
-  }
+  };
 
   useEffect(() => {
     const user = auth().currentUser;
@@ -57,22 +59,9 @@ const ShowPassword = () => {
         .doc(user.uid)
         .collection('compte')
         .onSnapshot(onResult, onError);
-        return ()=> tata()
+      return () => tata();
     }
   }, []);
-
-  useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const route = useRoute<RouteProp<RootStackParamList>>();
-  const {
-    control,
-    handleSubmit,
-    formState: {errors},
-  } = useForm<FormValues>({
-    defaultValues: {
-      identifiant: '',
-      password: '',
-    },
-  });
 
   const onSubmit = (key: string) => {
     const user = auth().currentUser;
@@ -91,6 +80,7 @@ const ShowPassword = () => {
         });
     }
   };
+
 
   return (
     <View style={styles.container}>
@@ -113,7 +103,19 @@ const ShowPassword = () => {
                 <Text>Mot de passe : {item.password}</Text>
                 <Button
                   title="Supprimer le mdp"
-                  onPress={handleSubmit(() => onSubmit(item.key))}
+                  onPress={() => onSubmit(item.key)}
+                />
+                <Button
+                  title="Modifier le mdp"
+                  onPress={() =>
+                    navigation.navigate('UpdatePasswordScreen', {
+                      key: item.key,
+                      identifiant: item.identifiant,
+                      namePlateform: item.namePlateform,
+                      password: item.password,
+                      typePlatform: item.typePlatform,
+                    })
+                  }
                 />
               </View>
             )}

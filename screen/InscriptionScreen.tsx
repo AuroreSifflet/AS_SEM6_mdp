@@ -26,6 +26,7 @@ const InscriptionScreen = () => {
     auth()
       .createUserWithEmailAndPassword(identifiantEmail, password)
       .then(() => {
+        auth().currentUser?.sendEmailVerification()
         console.log('User account created & signed in!');
       })
       .catch(error => {
