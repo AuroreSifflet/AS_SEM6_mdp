@@ -4,6 +4,13 @@ import auth from '@react-native-firebase/auth';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useForm, Controller} from 'react-hook-form';
+import ReactNativeBiometrics from 'react-native-biometrics'
+import MMKVStorage, {
+  useMMKVStorage,
+  MMKVLoader,
+} from 'react-native-mmkv-storage';
+import storage from '@react-native-firebase/storage';
+
 
 type FormValues = {
   identifiantEmail: string;
@@ -11,6 +18,12 @@ type FormValues = {
 };
 
 const InscriptionScreen = () => {
+  const mmkvStorage = new MMKVLoader().withEncryption().initialize();
+  const [userIdentifiantBiometrics, setUserIdentifiantBiometrics] = useMMKVStorage<string>('userIdentifiantBiometrics', mmkvStorage);
+  const [userPasswordBiometrics, setUserPasswordBiometrics] = useMMKVStorage<string>('userPasswordBiometrics', mmkvStorage,);
+  const [userKeyBiometrics, setUserKeyBiometrics] = useMMKVStorage<string>('userKeyBiometrics', mmkvStorage,);
+
+
   const {
     control,
     handleSubmit,
@@ -23,10 +36,32 @@ const InscriptionScreen = () => {
   });
   //   const onSubmit = (data: string) => console.log(data);
   const onSubmit = ({identifiantEmail, password}: FormValues) => {
+
+
     auth()
       .createUserWithEmailAndPassword(identifiantEmail, password)
       .then(() => {
-        auth().currentUser?.sendEmailVerification()
+        auth().currentUser?.sendEmailVerification();
+        //Génère une paire de clés publique privée RSA 2048 qui sera stockée dans le magasin de clés de l'appareil. Renvoie un Promisequi se résout en un objet fournissant des détails sur les clés.
+        const rnBiometrics = new ReactNativeBiometrics()
+
+        rnBiometrics.createKeys()
+        .then((resultObject) => {
+          const { publicKey } = resultObject
+          console.log("coucou clé"+publicKey)
+          setUserIdentifiantBiometrics(identifiantEmail);
+          setUserPasswordBiometrics(password);
+          setUserKeyBiometrics(publicKey);
+
+
+          const MyUser = {
+            identifiantEmail: identifiantEmail,
+            password: password,
+            publicKey: publicKey,
+          };
+          
+          console.log(MyUser.identifiantEmail, MyUser.password, MyUser.publicKey)
+        })
         console.log('User account created & signed in!');
       })
       .catch(error => {
@@ -41,7 +76,7 @@ const InscriptionScreen = () => {
         console.error(error);
       });
   };
-
+  console.log("state" + userIdentifiantBiometrics + userPasswordBiometrics + userKeyBiometrics)
   return (
     <View style={styles.container}>
       {/*   <View>
@@ -90,7 +125,6 @@ const InscriptionScreen = () => {
 
         {errors.password && errors.password.type === "required" && <Text>Veuillez indiquer un mot de passe</Text>}
         {errors.password && errors.password.type === "minLength"  && <Text>La longueur minimale du mot de passe est de huit caractères</Text>}
-        {errors.password && errors.password.type === "minLength"  && <Text>La longueur maximale du mot de passe est de 20 caractères</Text>}
 
         {/* <Button title="Inscrivez-vous" onPress={() => onSubmit(identifiantEmail, password)} /> */}
         <Button title="Inscrivez-vous" onPress={handleSubmit(onSubmit)} />

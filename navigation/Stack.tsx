@@ -10,13 +10,15 @@ import AddPassword from '../screen/Password/AddPassword';
 import ShowPassword from '../screen/Password/ShowPassword';
 import ForgotPassword from '../screen/Password/ForgotPassword';
 import UpdatePasswordScreen from '../screen/Password/UpdatePasswordScreen';
+import GalleryScreen from '../screen/GalleryScreen';
 
 export type RootStackParamList = {
   InscriptionScreen: undefined;
   ConnexionScreen: undefined;
   HomeConnectedScreen: {
-    identifiant: string;   
+    identifiant: string;
   };
+  GalleryScreen: undefined;
   AddPassword: undefined;
   ForgotPassword: undefined;
   ShowPassword: undefined;
@@ -38,14 +40,17 @@ const StackNav = () => {
         <Stack.Screen name="ConnexionScreen" component={ConnexionScreen} />
         <Stack.Screen name="AddPassword" component={AddPassword} />
         <Stack.Screen name="ShowPassword" component={ShowPassword} />
-        <Stack.Screen name="UpdatePasswordScreen" component={UpdatePasswordScreen} />
+        <Stack.Screen
+          name="UpdatePasswordScreen"
+          component={UpdatePasswordScreen}
+        />
         <Stack.Screen name="InscriptionScreen" component={InscriptionScreen} />
         <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
-        <Stack.Screen
-          name="HomeConnectedScreen"
-          component={HomeConnectedScreen}
-        />
+        <Stack.Screen name="HomeConnectedScreen" component={HomeConnectedScreen} />
+        <Stack.Screen name="GalleryScreen" component={GalleryScreen} />
       </Stack.Navigator>
+    
+
     </NavigationContainer>
   );
 };
